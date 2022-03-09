@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  tax-calculator:
+    build:
+      context: .
+    ports:
+      - "5100:5100"
+    networks:
+      - test-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+networks:
+  test-network:

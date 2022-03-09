@@ -1,0 +1,123 @@
+# Local
+
+### @name GreenTest
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan Karabaliev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3500,
+  "ssn": "99996",
+  "charitySpent": 500
+}
+
+### @name FullNameTest-Invalid
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan 12340978",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3500,
+  "ssn": "99997",
+  "charitySpent": 500
+}
+
+### @name GrossIncomeTest-Invalid
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan Karabaliev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": -123,
+  "ssn": "99998",
+  "charitySpent": 500
+}
+
+### @name SSNTest-Invalid
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan Karabaliev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3500,
+  "ssn": "test",
+  "charitySpent": 500
+}
+
+### @name CharitySpentTest-Invalid
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan Karabaliev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3500,
+  "ssn": "99999",
+  "charitySpent": -123
+}
+
+### @name TaxParamsTest-Invalid
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan Karabaliev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3500,
+  "ssn": "99999",
+  "charitySpent": 0,
+  "country": "Imagiaria",
+  "version": "2"
+}
+
+### @name GeorgeExample
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "George Georgiev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 980,
+  "ssn": "00001",
+  "charitySpent": 0
+}
+
+### @name IrinaExample
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Irina Georgieva",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3400,
+  "ssn": "00002",
+  "charitySpent": 0
+}
+
+### @name MickExample
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Mick Georgiev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 2500,
+  "ssn": "00003",
+  "charitySpent": 150
+}
+
+### @name BillExample
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Bill Georgiev",
+  "dateOfBirth": "2022-03-09T17:45:58.975Z",
+  "grossIncome": 3600,
+  "ssn": "00004",
+  "charitySpent": 520
+}
