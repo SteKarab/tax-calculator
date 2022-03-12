@@ -60,6 +60,15 @@ content-type: application/json
   "charitySpent": -123
 }
 
+### @name MissingInfoTest-Invalid
+POST http://0.0.0.0:5100/tax HTTP/1.1
+content-type: application/json
+
+{
+  "fullName": "Stefan Karabaliev",
+  "ssn": "99999"
+}
+
 ### @name TaxParamsTest-Invalid
 POST http://0.0.0.0:5100/tax HTTP/1.1
 content-type: application/json

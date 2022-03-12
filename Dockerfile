@@ -1,6 +1,6 @@
 # Stage 1 - Build
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 
 WORKDIR /app
 
@@ -12,6 +12,7 @@ RUN apt-get update \
 COPY *.sln .
 COPY TaxCalculator/*.csproj ./TaxCalculator/
 COPY TaxCalculator.Tests/*.csproj ./TaxCalculator.Tests/
+COPY TaxCalculator.IntegrationTests/*.csproj ./TaxCalculator.IntegrationTests/
 RUN dotnet restore
 
 # Copy over everything else and build app
@@ -26,7 +27,7 @@ RUN dotnet test
 
 FROM build as debug
 
-WORKDIR /app/TaxCalculator/bin/Debug/TaxCalculator/net6.0
+WORKDIR /app/TaxCalculator/bin/Debug/TaxCalculator/net5.0
 
 ENTRYPOINT ["dotnet", "exec", "TaxCalculator.dll", "--urls", "http://0.0.0.0:5100"]
 
@@ -38,7 +39,7 @@ WORKDIR /app/TaxCalculator
 
 RUN dotnet publish -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 WORKDIR /app
 COPY --from=release /app/TaxCalculator/out ./
 

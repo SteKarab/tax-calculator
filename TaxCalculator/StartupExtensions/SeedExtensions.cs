@@ -1,11 +1,14 @@
-﻿using TaxCalculator.Data;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using TaxCalculator.Data;
 using TaxCalculator.Models;
 
-namespace TaxCalculator.StartupExtensions;
-
-public static class SeedExtensions
+namespace TaxCalculator.StartupExtensions
 {
-    public static IApplicationBuilder SeedTaxParams(this IApplicationBuilder app)
+    public static class SeedExtensions
+    {
+        public static IApplicationBuilder SeedTaxParams(this IApplicationBuilder app)
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
             
@@ -37,4 +40,6 @@ public static class SeedExtensions
 
             return app;
         }
+    }
 }
+

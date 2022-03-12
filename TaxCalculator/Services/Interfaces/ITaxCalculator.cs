@@ -1,8 +1,10 @@
-﻿using TaxCalculator.Dtos;
+﻿using System.Threading.Tasks;
+using TaxCalculator.Dtos;
 
-namespace TaxCalculator.Services.Interfaces;
-
-public interface ITaxCalculator
+namespace TaxCalculator.Services.Interfaces
 {
-    Task<TaxesDto> CalculateTaxes(TaxPayerDto taxPayer);
+    public interface ITaxCalculator
+    {
+        Task<TaxesDto> CalculateTaxes(TaxPayerDto taxPayer);
+    }
 }

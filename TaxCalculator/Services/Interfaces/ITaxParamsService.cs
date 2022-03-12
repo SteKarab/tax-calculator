@@ -1,8 +1,10 @@
-﻿using TaxCalculator.Models;
+﻿using System.Threading.Tasks;
+using TaxCalculator.Models;
 
-namespace TaxCalculator.Services.Interfaces;
-
-public interface ITaxParamsService
+namespace TaxCalculator.Services.Interfaces
 {
-    Task<TaxParams> GetParamsFor(string country, string version);
+    public interface ITaxParamsService
+    {
+        Task<TaxParams> GetParamsFor(string country, string version);
+    }
 }

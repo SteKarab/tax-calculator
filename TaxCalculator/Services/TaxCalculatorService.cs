@@ -1,79 +1,65 @@
-﻿using Mapster;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Mapster;
 using TaxCalculator.Data;
+using TaxCalculator.Domain.TaxCalculations.Interfaces;
 using TaxCalculator.Dtos;
+using TaxCalculator.Exceptions;
 using TaxCalculator.Models;
 using TaxCalculator.Services.Interfaces;
 
-namespace TaxCalculator.Services;
-
-public class TaxCalculatorService: ITaxCalculator
+namespace TaxCalculator.Services
 {
-    private TaxPayerContext _context;
-    private ITaxParamsService _taxParamsService;
-
-    public TaxCalculatorService(TaxPayerContext context, ITaxParamsService taxParamsService)
+    public class TaxCalculatorService: ITaxCalculator
     {
-        _context = context;
-        _taxParamsService = taxParamsService;
-    }
+        private TaxPayerContext _context;
+        private ITaxParamsService _taxParamsService;
+        private ITaxCalculationState _calculationState;
+        private IOrderedEnumerable<ITaxCalculation> _taxCalculations;
     
-    public async Task<TaxesDto> CalculateTaxes(TaxPayerDto taxPayer)
-    {
-        var taxParams = await _taxParamsService.GetParamsFor(taxPayer.Country, taxPayer.Version);
-        var existingTaxes = await _context.PayerTaxes.FindAsync(taxPayer.SSN);
-
-        if (existingTaxes != null)
+        public TaxCalculatorService(TaxPayerContext context, ITaxParamsService taxParamsService, ITaxCalculationStateFactory stateFactory, IEnumerable<ITaxCalculation> taxCalculations)
         {
-            return existingTaxes.Adapt<TaxesDto>();
+            _context = context;
+            _taxParamsService = taxParamsService;
+            _calculationState = stateFactory.GetNewState();
+            _taxCalculations = taxCalculations.OrderBy(x => x.Rank);
         }
-
-        var taxes = new TaxesDto
+        
+        public async Task<TaxesDto> CalculateTaxes(TaxPayerDto taxPayer)
         {
-            CharitySpent = taxPayer.CharitySpent,
-            GrossIncome = taxPayer.GrossIncome,
-            NetIncome = taxPayer.GrossIncome,
-            SSN = taxPayer.SSN
-        };
-
-        (var taxableIncome, var socialTaxableIncome) = CalculateBaselines(taxPayer, taxParams);
-
-        if (taxableIncome <= taxParams.IncomeTaxFloor) return taxes;
-
-        taxes.IncomeTax = CalculateIncomeTax(taxableIncome, taxParams);
-        taxes.SocialTax = CalculateSocialTax(socialTaxableIncome, taxParams);
-        taxes.TotalTax = taxes.SocialTax + taxes.IncomeTax;
-        taxes.NetIncome = taxes.GrossIncome - taxes.TotalTax;
-
-        await _context.AddAsync(taxes.Adapt<Taxes>());
-        await _context.SaveChangesAsync();
-
-        return taxes;
-    }
-
-    private (decimal taxableIncome, decimal socialTaxableIncome) CalculateBaselines(TaxPayerDto taxPayer, TaxParams taxParams)
-    {
-        var charity = Math.Min(Math.Round(taxPayer.GrossIncome * taxParams.AllowedCharityPercentage / 100), taxPayer.CharitySpent);
-
-        var taxableIncome = taxPayer.GrossIncome - charity;
-        var socialTaxableIncome = taxableIncome;
-
-        return (taxableIncome, socialTaxableIncome);
-    }
-
-    private decimal CalculateIncomeTax(decimal taxableIncome, TaxParams taxParams)
-    {
-        taxableIncome -= taxParams.IncomeTaxFloor;
-        var incomeTax = Math.Round(taxableIncome * taxParams.IncomeTaxPercentage / 100, 2);
-        return incomeTax;
-    }
-
-    private decimal CalculateSocialTax(decimal socialTaxableIncome, TaxParams taxParams)
-    {
-        socialTaxableIncome -= taxParams.SocialTaxFloor;
-        var defaultSocialRange = taxParams.SocialTaxCeiling - taxParams.SocialTaxFloor;
-        var taxableSocialAmount = Math.Min(defaultSocialRange, socialTaxableIncome);
-        var socialTax = Math.Round(taxableSocialAmount * taxParams.SocialTaxPercentage / 100, 2);
-
-        return socialTax;
+            if (!taxPayer.GrossIncome.HasValue || !taxPayer.CharitySpent.HasValue || taxPayer.GrossIncome < 0 || taxPayer.CharitySpent < 0) throw new InvalidTaxInformationException();
+            
+            var taxParams = await _taxParamsService.GetParamsFor(taxPayer.Country, taxPayer.Version);
+            var existingTaxes = await _context.PayerTaxes.FindAsync(taxPayer.SSN);
+    
+            if (existingTaxes != null)
+            {
+                return existingTaxes.Adapt<TaxesDto>();
+            }
+    
+            var taxes = new TaxesDto
+            {
+                CharitySpent = taxPayer.CharitySpent ?? 0,
+                GrossIncome = taxPayer.GrossIncome ?? 0,
+                SSN = taxPayer.SSN
+            };
+    
+            foreach (var taxCalculation in _taxCalculations)
+            {
+                taxCalculation.Execute(_calculationState, taxPayer, taxParams);
+                if (_calculationState.IsComplete) break;
+            }
+    
+            taxes.IncomeTax = _calculationState.IncomeTax;
+            taxes.SocialTax = _calculationState.SocialTax;
+            taxes.TotalTax = _calculationState.TotalTax;
+            taxes.NetIncome = taxes.GrossIncome - taxes.TotalTax;
+    
+            await _context.AddAsync(taxes.Adapt<Taxes>());
+            await _context.SaveChangesAsync();
+    
+            return taxes;
+        }
     }
 }

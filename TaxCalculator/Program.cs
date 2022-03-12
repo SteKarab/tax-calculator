@@ -1,39 +1,20 @@
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using Microsoft.EntityFrameworkCore;
-using TaxCalculator.Data;
-using TaxCalculator.Services;
-using TaxCalculator.Services.Interfaces;
-using TaxCalculator.StartupExtensions;
-using TaxCalculator.Validation;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddValidatorsFromAssemblyContaining<TaxPayerDtoValidator>(ServiceLifetime.Singleton);
-builder.Services.AddFluentValidation();
-builder.Services.AddDbContext<TaxPayerContext>(options =>
+namespace TaxCalculator
 {
-    options.UseInMemoryDatabase("InMemoryDb");
-});
-builder.Services.AddScoped<ITaxCalculator, TaxCalculatorService>();
-builder.Services.AddScoped<ITaxParamsService, TaxParamsService>();
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
 
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
 }
-
-app.SeedTaxParams();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

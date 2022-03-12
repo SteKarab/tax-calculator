@@ -1,5 +1,8 @@
-﻿namespace TaxCalculator.Exceptions;
+﻿using System;
 
-public class TaxParamsNotFoundException: Exception
+namespace TaxCalculator.Exceptions
 {
+    public class TaxParamsNotFoundException: Exception
+    {
+    }
 }

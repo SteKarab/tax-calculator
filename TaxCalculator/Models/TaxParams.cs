@@ -1,26 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
-namespace TaxCalculator.Models;
-
-public class TaxParams
+namespace TaxCalculator.Models
 {
-    [Required]
-    [MaxLength(100)]
-    public string Country { get; set; }
-    [Required]
-    [MaxLength(20)]
-    public string Version { get; set; }
-    [Precision(30, 2)]
-    public decimal IncomeTaxPercentage { get; set; }
-    [Precision(30, 2)]
-    public decimal IncomeTaxFloor { get; set; }
-    [Precision(30, 2)]
-    public decimal SocialTaxPercentage { get; set; }
-    [Precision(30, 2)]
-    public decimal SocialTaxFloor { get; set; }
-    [Precision(30, 2)]
-    public decimal SocialTaxCeiling { get; set; }
-    [Precision(30, 2)]
-    public decimal AllowedCharityPercentage { get; set; }
+    public class TaxParams
+    {
+        [Required]
+        [MaxLength(100)]
+        public string Country { get; set; }
+        [Required]
+        [MaxLength(20)]
+        public string Version { get; set; }
+        public decimal IncomeTaxPercentage { get; set; }
+        public decimal IncomeTaxFloor { get; set; }
+        public decimal SocialTaxPercentage { get; set; }
+        public decimal SocialTaxFloor { get; set; }
+        public decimal SocialTaxCeiling { get; set; }
+        public decimal AllowedCharityPercentage { get; set; }
+    }
 }
+
